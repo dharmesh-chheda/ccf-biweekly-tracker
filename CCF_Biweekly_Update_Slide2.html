@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC Factory – Workstream Roadmap</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#e8e5ec;color:#333;font-size:13px}
+
+.outer{max-width:1500px;margin:24px auto;background:#fff;border-radius:10px;box-shadow:0 2px 20px rgba(0,0,0,.12);overflow:hidden;width:calc(100% - 48px)}
+.title-bar{background:linear-gradient(135deg,#6b3a7d,#4a1a6b);color:#fff;padding:14px 24px;font-size:17px;font-weight:600;display:flex;align-items:center;gap:12px}
+.title-btns{margin-left:auto;display:flex;align-items:center;gap:8px}
+.screenshot-btn{padding:6px 16px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;display:flex;align-items:center;gap:6px}
+.screenshot-btn:hover{background:rgba(255,255,255,.25)}
+.sync-status{font-size:11px;opacity:.8;display:flex;align-items:center;gap:4px}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.sync-dot.not-connected{background:#f39c12}
+.sync-dot.connected{background:#27ae60}
+.sync-dot.saved{background:#27ae60;animation:pulse-dot .6s ease-out}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(39,174,96,.5)}100%{box-shadow:0 0 0 6px rgba(39,174,96,0)}}
+.legend-bar{padding:8px 24px;background:#f7f4f9;border-bottom:1px solid #e0d8e8;font-size:11.5px;color:#666;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(0,0,0,.1)}
+.lg-done{background:#7b3f9e}.lg-green{background:#27ae60}.lg-yellow{background:#f1c40f}.lg-red{background:#e74c3c}.lg-onhold{background:#85c1e9}
+.legend-swatch{width:28px;height:10px;border-radius:2px}
+.sw-planned{background:#d8d8d8}.sw-completed{background:#9b69b5}
+.badge{background:#7b3f9e;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+
+.chart-scroll{overflow-x:auto}
+.chart{width:100%;position:relative}
+
+.row{display:grid;grid-template-columns:minmax(180px,280px) 90px 1fr;align-items:stretch;border-bottom:1px solid #f0eef2;min-height:32px;position:relative}
+.row:last-child{border-bottom:none}
+.row.hdr{background:#f0ecf3;border-bottom:1px solid #d6cee0;min-height:30px}
+.row.hdr2{background:#f5f2f7;border-bottom:2px solid #d6cee0;min-height:30px}
+.row.group{background:linear-gradient(90deg,#f3edf7 0%,#f8f5fa 100%)}
+.row.group .nm{font-weight:700;color:#4a2060}
+.row.child .nm{padding-left:38px}
+.row.child:hover{background:#faf8fc}
+.row.group:hover{background:linear-gradient(90deg,#ede5f3 0%,#f5f0f8 100%)}
+
+.nm,.pct,.gantt{display:flex;align-items:center}
+.nm{padding:0 10px 0 14px;white-space:nowrap;gap:6px;font-size:13px;line-height:1.3;overflow:visible;position:relative;z-index:3}
+.nm-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pct{justify-content:center;font-size:12.5px;position:relative;z-index:2}
+.pct-input{pointer-events:auto}
+.gantt{position:relative;overflow:visible;z-index:1}
+
+.date-pop{position:fixed;background:#fff;border:1px solid #ddd;border-radius:10px;padding:14px 16px;z-index:100;box-shadow:0 6px 24px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:10px;min-width:200px}
+.date-pop label{font-size:11px;font-weight:600;color:#777;margin-bottom:2px;display:block}
+.date-pop input[type=date]{width:100%;padding:6px 8px;border:1.5px solid #e0d8e8;border-radius:6px;font-size:13px;font-family:inherit}
+.date-pop input[type=date]:focus{border-color:#7b3f9e;outline:none;box-shadow:0 0 0 2.5px rgba(123,63,158,.12)}
+
+.pct-input{width:86px;border:1px solid transparent;background:transparent;text-align:center;font-size:12px;padding:3px 2px;border-radius:5px;font-family:inherit;color:#333;cursor:text;transition:border-color .15s,background .15s}
+.pct-input:hover{border-color:#c9b8d6;background:#faf7fc}
+.pct-input:focus{border-color:#7b3f9e;background:#fff;outline:none;box-shadow:0 0 0 2.5px rgba(123,63,158,.18)}
+.group .pct-input{font-weight:700}
+
+.status-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2.5px solid rgba(255,255,255,.7);transition:transform .15s,box-shadow .15s;flex-shrink:0;position:relative;z-index:6;box-shadow:0 1px 3px rgba(0,0,0,.2);pointer-events:auto}
+.status-dot:hover{transform:scale(1.3);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.st-done{background:#7b3f9e}.st-green{background:#27ae60}.st-yellow{background:#f1c40f}.st-red{background:#e74c3c}.st-onhold{background:#85c1e9}.st-gray{background:#bdc3c7}
+
+.picker-overlay{position:fixed;inset:0;z-index:90}
+.status-picker{position:fixed;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px 10px;display:flex;gap:8px;z-index:100;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.sp-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .12s,border-color .12s}
+.sp-opt:hover{transform:scale(1.18);border-color:#444}
+.sp-label{font-size:10px;color:#777;text-align:center;margin-top:2px}
+
+.bar{position:absolute;top:8px;height:16px;border-radius:3px;pointer-events:none}
+.bar-bg{background:#d8d8d8}
+.bar-progress{transition:width .35s ease,background .35s ease;border-radius:3px}
+
+.today-tick{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed #8b1a1a;z-index:4;pointer-events:none}
+.grid-line{position:absolute;top:0;bottom:0;width:0;border-left:1px solid rgba(0,0,0,.04);z-index:0;pointer-events:none}
+
+.hdr-cell{text-align:center;font-weight:600;font-size:12px;color:#555;padding:5px 0;border-left:1px solid #e0dae6}
+.hdr-cell:first-child{border-left:none}
+.hdr-cell.year{font-size:13px;color:#333;font-weight:700;padding:4px 0}
+
+.today-label{position:absolute;transform:translateX(-50%);background:#8b1a1a;color:#fff;font-size:9px;padding:2px 8px;border-radius:0 0 5px 5px;white-space:nowrap;z-index:8;pointer-events:none;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.gantt-dot-wrap{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:6}
+.row.group-sep{border-top:2px solid #e0d8e8}
+
+/* ── Row action buttons ── */
+.row-actions{position:absolute;right:4px;top:50%;transform:translateY(-50%);display:flex;gap:3px;opacity:0;transition:opacity .15s;z-index:12}
+.row:hover .row-actions{opacity:1}
+.row-btn{width:20px;height:20px;border-radius:4px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;line-height:1;transition:background .12s,transform .1s;pointer-events:auto}
+.row-btn:active{transform:scale(.9)}
+.btn-add{background:#e8dff0;color:#7b3f9e}
+.btn-add:hover{background:#d4c4e3}
+.btn-del{background:#fce8e8;color:#c0392b}
+.btn-del:hover{background:#f5cccc}
+.btn-cal{background:#e0ecf8;color:#2c6fbb;font-size:11px}
+.btn-cal:hover{background:#cce0f5}
+.btn-edit{background:#e0f0e8;color:#1e7a45;font-size:11px}
+.btn-edit:hover{background:#c8e6d0}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.visible{opacity:1;pointer-events:auto}
+.modal{background:#fff;border-radius:12px;padding:28px 32px;width:420px;max-width:95vw;box-shadow:0 12px 40px rgba(0,0,0,.2);transform:translateY(10px);transition:transform .2s}
+.modal-overlay.visible .modal{transform:translateY(0)}
+.modal h3{font-size:16px;color:#4a1a6b;margin-bottom:18px}
+.modal label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:4px;margin-top:12px}
+.modal label:first-of-type{margin-top:0}
+.modal input,.modal select{width:100%;padding:8px 10px;border:1.5px solid #e0d8e8;border-radius:6px;font-size:13px;font-family:inherit;transition:border-color .15s}
+.modal input:focus,.modal select:focus{border-color:#7b3f9e;outline:none;box-shadow:0 0 0 2.5px rgba(123,63,158,.12)}
+.modal .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.modal-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+.modal-btns button{padding:9px 22px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:background .12s}
+.modal-btns .btn-cancel{background:#f0f0f0;color:#666}
+.modal-btns .btn-cancel:hover{background:#e0e0e0}
+.modal-btns .btn-ok{background:linear-gradient(135deg,#7b3f9e,#5a2d7a);color:#fff}
+.modal-btns .btn-ok:hover{box-shadow:0 4px 12px rgba(123,63,158,.3)}
+.cb-row{display:flex;align-items:center;gap:8px;margin-top:12px}
+.cb-row input[type=checkbox]{width:auto;accent-color:#7b3f9e}
+.cb-row label{margin:0;font-size:12px;font-weight:500;color:#555}
+</style>
+</head>
+<body>
+
+<div class="outer">
+  <div class="title-bar">CC Factory – Workstream Roadmap
+    <span class="title-btns">
+      <span class="sync-status" id="syncStatus"><span class="sync-dot not-connected"></span> Connecting...</span>
+      <button class="screenshot-btn" id="btnScreenshot">&#128247; Screenshot</button>
+    </span>
+  </div>
+  <div class="legend-bar">
+    <span class="legend-item"><span class="badge">B</span> = In scope for CC Beta Release</span>
+    <span class="legend-item"><span class="legend-dot lg-done"></span> Done</span>
+    <span class="legend-item"><span class="legend-dot lg-green"></span> On Track</span>
+    <span class="legend-item"><span class="legend-dot lg-yellow"></span> Risk of Delay</span>
+    <span class="legend-item"><span class="legend-dot lg-red"></span> Delayed</span>
+    <span class="legend-item"><span class="legend-dot lg-onhold"></span> On Hold</span>
+    <span style="margin-left:8px"></span>
+    <span class="legend-item"><span class="legend-swatch sw-planned"></span> Planned Effort</span>
+    <span class="legend-item"><span class="legend-swatch sw-completed"></span> Completed Effort</span>
+    <span class="legend-item hide-on-capture" style="margin-left:auto;opacity:.65;font-style:italic">Click % to edit &middot; Click status dot to change &middot; Hover row for &#9998;/&#128197;/+/&minus;</span>
+  </div>
+  <div class="chart-scroll">
+    <div class="chart" id="chart"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add Workstream Row</h3>
+    <label>Name</label>
+    <input type="text" id="fName" placeholder="e.g. New Workstream" />
+    <div class="row-2">
+      <div><label>Type</label><select id="fType"><option value="child">Child item</option><option value="group">Group header</option></select></div>
+      <div><label>Status</label><select id="fStatus"><option value="done">Done</option><option value="green">On Track</option><option value="yellow">Risk of Delay</option><option value="red">Delayed</option><option value="onhold">On Hold</option><option value="gray">Not Started</option></select></div>
+    </div>
+    <div class="row-3">
+      <div><label>% Complete</label><input type="text" id="fPct" value="0" /></div>
+      <div><label>Start Date</label><input type="date" id="fStart" /></div>
+      <div><label>End Date</label><input type="date" id="fEnd" /></div>
+    </div>
+    <div class="cb-row">
+      <input type="checkbox" id="fAlpha" />
+      <label for="fAlpha">In scope for CC Beta Release</label>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="btnCancel">Cancel</button>
+      <button class="btn-ok" id="btnOk">Add Row</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var TIMELINE_START = new Date(2025, 9, 1);
+var TIMELINE_END   = new Date(2026, 11, 31);
+var TODAY          = new Date(2026, 2, 17);
+var TOTAL_MS       = TIMELINE_END - TIMELINE_START;
+
+function pct(date) {
+  return ((new Date(date) - TIMELINE_START) / TOTAL_MS) * 100;
+}
+var TODAY_PCT = pct(TODAY);
+
+var HEADER_COLS = [
+  { label:'Oct', start:'2025-10-01', end:'2025-11-01' },
+  { label:'Nov', start:'2025-11-01', end:'2025-12-01' },
+  { label:'Dec', start:'2025-12-01', end:'2026-01-01' },
+  { label:'Jan', start:'2026-01-01', end:'2026-02-01' },
+  { label:'Feb', start:'2026-02-01', end:'2026-03-01' },
+  { label:'Mar', start:'2026-03-01', end:'2026-04-01' },
+  { label:'Q2',  start:'2026-04-01', end:'2026-07-01' },
+  { label:'Q3',  start:'2026-07-01', end:'2026-10-01' },
+  { label:'Q4',  start:'2026-10-01', end:'2027-01-01' },
+];
+var YEAR_COLS = [
+  { label:'2025', start:'2025-10-01', end:'2026-01-01' },
+  { label:'2026', start:'2026-01-01', end:'2027-01-01' },
+];
+
+var DEFAULT_DATA = /*DEFAULT_DATA_START*/[
+  { id:1,  name:'Fraud (CC) - Identity Fraud',            pct:88, delta:1,  status:'green',  group:true,  subgroup:false, alpha:false, start:'2025-10-01', end:'2026-03-31' },
+  { id:2,  name:'Dev of Identity Fraud Rules & Models',    pct:96, delta:2,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-10-01', end:'2026-03-31' },
+
+  { id:3,  name:'Debt Resolutions',                       pct:20, delta:2,  status:'green',  group:true,  subgroup:false, alpha:false, start:'2025-11-01', end:'2026-09-01' },
+  { id:4,  name:'Product and Tech De-Risk Planning',      pct:60, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-11-01', end:'2026-04-15' },
+  { id:5,  name:'Revamped Core Entity for Troy',          pct:50, delta:5,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-12-01', end:'2026-05-01' },
+  { id:6,  name:'Digital Communications',                 pct:10, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-01-01', end:'2026-07-01' },
+  { id:7,  name:'Cease Comms (BK,FDCPA,SCRA)',            pct:5,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-02-01', end:'2026-08-01' },
+  { id:8,  name:'Agencies Outreach',                      pct:7,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-02-01', end:'2026-08-01' },
+
+  { id:9,  name:'Credit Strategy',                        pct:80, delta:2,  status:'green',  group:true,  subgroup:false, alpha:false, start:'2025-11-01', end:'2026-04-15' },
+  { id:10, name:'Policies for external launch approval',  pct:0,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-03-01', end:'2026-05-15' },
+
+  { id:11, name:'Sponsor Bank CC Reports',                pct:62, delta:6,  status:'yellow', group:true,  subgroup:false, alpha:false, start:'2025-10-01', end:'2026-07-01' },
+  { id:12, name:'Beta Reports',                           pct:64, delta:10, status:'green',  group:false, subgroup:false, alpha:true,  start:'2025-10-01', end:'2026-04-15' },
+  { id:13, name:'Beta New Features',                      pct:44, delta:0,  status:'green',  group:false, subgroup:false, alpha:true,  start:'2026-01-01', end:'2026-07-01' },
+  { id:14, name:'Purchases of Receivables',               pct:70, delta:0,  status:'green',  group:false, subgroup:false, alpha:true,  start:'2025-12-01', end:'2026-06-01' },
+  { id:15, name:'Recon',                                  pct:75, delta:0,  status:'green',  group:false, subgroup:false, alpha:true,  start:'2025-11-01', end:'2026-04-15' },
+  { id:16, name:'SB Ops',                                 pct:80, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-11-01', end:'2026-03-15' },
+  { id:17, name:'CC Policies & Procedures',               pct:42, delta:1,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-02-01', end:'2026-08-01' },
+
+  { id:18, name:'Card Issuing',                           pct:92, delta:2,  status:'yellow', group:true,  subgroup:false, alpha:false, start:'2025-10-01', end:'2026-04-15' },
+  { id:19, name:'Carrier Integration testing',            pct:23, delta:23, status:'green',  group:false, subgroup:false, alpha:true,  start:'2026-02-01', end:'2026-06-15' },
+
+  { id:20, name:'Cashback',                               pct:-1, delta:0,  status:'green',  group:true,  subgroup:false, alpha:false, start:'2025-11-01', end:'2026-12-31' },
+  { id:21, name:'Product Definition & Design',            pct:85, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-11-01', end:'2026-04-15' },
+  { id:22, name:'Earn Foundation',                        pct:60, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-12-01', end:'2026-05-01' },
+  { id:23, name:'Redemption Foundation',                  pct:5,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-02-01', end:'2026-07-01' },
+  { id:24, name:'Cashback Hub',                           pct:5,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-02-01', end:'2026-08-01' },
+  { id:25, name:'CC Redemption',                          pct:0,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-05-01', end:'2026-08-01' },
+  { id:26, name:'Feed',                                   pct:0,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-05-01', end:'2026-12-31' },
+
+  { id:27, name:'Collateral Lines',                       pct:-1, delta:0,  status:'green',  group:true,  subgroup:false, alpha:false, start:'2025-11-01', end:'2026-12-31' },
+  { id:28, name:'Product Definition & Design',            pct:70, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-11-01', end:'2026-04-15' },
+  { id:29, name:'Money Box API Gateway Integration',      pct:80, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2025-12-01', end:'2026-04-15' },
+  { id:30, name:'Withdraw',                               pct:10, delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-02-01', end:'2026-05-15' },
+  { id:31, name:'Hire',                                   pct:0,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-03-01', end:'2026-06-15' },
+  { id:32, name:'Deposit',                                pct:0,  delta:0,  status:'green',  group:false, subgroup:false, alpha:false, start:'2026-03-01', end:'2026-08-01' },
+]/*DEFAULT_DATA_END*/;
+
+var nextId = /*NEXT_ID_START*/100/*NEXT_ID_END*/;
+var DATA;
+
+function loadData() {
+  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function saveData() {
+  lastKnownJSON = JSON.stringify(DATA);
+  pollSkipUntil = Date.now() + POLL_INTERVAL + 2000;
+  pushData();
+}
+
+// ═══════════════════════════════════════
+//  GOOGLE APPS SCRIPT BACKEND
+// ═══════════════════════════════════════
+// PASTE YOUR DEPLOYED APPS SCRIPT URL BELOW:
+var SCRIPT_URL = '';
+var SLIDE_ID = 'slide2';
+var POLL_INTERVAL = 10000;
+var lastKnownJSON = '';
+var pollSkipUntil = 0;
+var saveTimer = null;
+var backendReady = false;
+
+function updateSyncUI(state, msg) {
+  var el = document.getElementById('syncStatus');
+  if (!el) return;
+  var dot = el.querySelector('.sync-dot');
+  dot.className = 'sync-dot ' + state;
+  el.lastChild.textContent = ' ' + msg;
+}
+
+function flashSaved() {
+  updateSyncUI('saved', 'Saved');
+  setTimeout(function() { updateSyncUI('connected', 'Synced'); }, 1200);
+}
+
+function pushData() {
+  if (!SCRIPT_URL) return;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(function() {
+    saveTimer = null;
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ slide: SLIDE_ID, data: DATA, nextId: nextId })
+    }).then(function() {
+      flashSaved();
+    }).catch(function(err) {
+      console.error('Save failed:', err);
+      updateSyncUI('not-connected', 'Save failed');
+    });
+  }, 600);
+}
+
+function fetchRemoteData() {
+  if (!SCRIPT_URL) return Promise.resolve(null);
+  return fetch(SCRIPT_URL + '?slide=' + SLIDE_ID)
+    .then(function(r) { return r.json(); })
+    .then(function(result) {
+      if (result && result.data && Array.isArray(result.data) && result.data.length > 0) {
+        return result;
+      }
+      return null;
+    })
+    .catch(function() { return null; });
+}
+
+async function pollForChanges() {
+  if (!SCRIPT_URL || !backendReady) return;
+  if (Date.now() < pollSkipUntil) return;
+  try {
+    var result = await fetchRemoteData();
+    if (!result || !result.data) return;
+    var remoteJSON = JSON.stringify(result.data);
+    if (remoteJSON !== lastKnownJSON) {
+      DATA = result.data;
+      if (result.nextId && result.nextId > nextId) nextId = result.nextId;
+      lastKnownJSON = remoteJSON;
+      render();
+      updateSyncUI('saved', 'Updated');
+      setTimeout(function() { updateSyncUI('connected', 'Synced'); }, 1500);
+    }
+  } catch (e) {}
+}
+
+setInterval(pollForChanges, POLL_INTERVAL);
+
+// On load: try to fetch from backend, fall back to DEFAULT_DATA
+(async function init() {
+  if (!SCRIPT_URL) {
+    updateSyncUI('not-connected', 'No backend URL');
+    loadData();
+    lastKnownJSON = JSON.stringify(DATA);
+    return;
+  }
+  updateSyncUI('not-connected', 'Connecting...');
+  var result = await fetchRemoteData();
+  if (result && result.data) {
+    DATA = result.data;
+    if (result.nextId) nextId = result.nextId;
+    backendReady = true;
+    updateSyncUI('connected', 'Synced');
+  } else {
+    loadData();
+    backendReady = true;
+    pushData();
+    updateSyncUI('connected', 'Synced');
+  }
+  lastKnownJSON = JSON.stringify(DATA);
+})();
+
+var chartEl = document.getElementById('chart');
+
+function progressColor(p) {
+  if (p < 0)   return '#b48cc6';
+  if (p === 0) return '#c9a8d8';
+  if (p <= 20) return '#b88fcc';
+  if (p <= 40) return '#a87abf';
+  if (p <= 60) return '#9966b3';
+  if (p <= 80) return '#8a52a6';
+  return '#7b3f9e';
+}
+
+function ganttGridHTML() {
+  var h = '';
+  HEADER_COLS.forEach(function(c) {
+    var p = pct(c.start);
+    if (p > 0) h += '<div class="grid-line" style="left:' + p + '%"></div>';
+  });
+  h += '<div class="today-tick" style="left:' + TODAY_PCT + '%"></div>';
+  return h;
+}
+var GRID_HTML = ganttGridHTML();
+
+function recomputeGroups() {
+  var lastGroup = -1;
+  for (var i = 0; i < DATA.length; i++) {
+    if (DATA[i].group) {
+      DATA[i].firstInGroup = (lastGroup !== -1);
+      if (i === 0) DATA[i].firstInGroup = true;
+      lastGroup = i;
+    } else {
+      DATA[i].firstInGroup = false;
+    }
+  }
+}
+
+function buildHeader() {
+  var yearRow = '<div class="row hdr">' +
+    '<div class="nm hdr-cell" style="border:none;justify-content:flex-start;padding-left:14px;font-weight:700;color:#333">Workstream</div>' +
+    '<div class="pct hdr-cell" style="border:none"></div>' +
+    '<div class="gantt" style="position:relative;min-height:28px">';
+  YEAR_COLS.forEach(function(y) {
+    var l = pct(y.start), r = pct(y.end);
+    yearRow += '<div class="hdr-cell year" style="position:absolute;left:' + l + '%;width:' + (r-l) + '%;top:0;bottom:0;display:flex;align-items:center;justify-content:center;border-left:1px solid #d6cee0">' + y.label + '</div>';
+  });
+  yearRow += '<div class="today-label" style="left:' + TODAY_PCT + '%;bottom:0">Today status</div>';
+  yearRow += '</div></div>';
+
+  var monthRow = '<div class="row hdr2">' +
+    '<div class="nm hdr-cell" style="border:none"></div>' +
+    '<div class="pct hdr-cell" style="border:none;font-size:11px;color:#777;font-weight:500">% complete</div>' +
+    '<div class="gantt" style="position:relative;min-height:28px">';
+  HEADER_COLS.forEach(function(c) {
+    var l = pct(c.start), r = Math.min(pct(c.end), 100);
+    monthRow += '<div class="hdr-cell" style="position:absolute;left:' + l + '%;width:' + (r-l) + '%;top:0;bottom:0;display:flex;align-items:center;justify-content:center">' + c.label + '</div>';
+  });
+  monthRow += '<div class="today-tick" style="left:' + TODAY_PCT + '%"></div>';
+  monthRow += '</div></div>';
+
+  return yearRow + monthRow;
+}
+
+function formatPct(item) {
+  if (item.pct < 0) return 'TBD';
+  var s = item.pct + '%';
+  if (item.delta && item.delta > 0) s += '(+' + item.delta + ')';
+  return s;
+}
+
+function buildRow(item) {
+  var cls = 'row ' + (item.group ? 'group' : 'child') + (item.firstInGroup ? ' group-sep' : '');
+  var startP = pct(item.start);
+  var endP   = pct(item.end);
+  var barW   = endP - startP;
+  var progressW = (startP < TODAY_PCT) ? Math.min(TODAY_PCT - startP, barW) : 0;
+  var pColor = progressColor(item.pct);
+  var pctDisplay = formatPct(item);
+
+  var nameHTML = '';
+  if (item.alpha) nameHTML += '<span class="badge">B</span>';
+  nameHTML += '<span class="nm-text">' + item.name + '</span>';
+
+  return '<div class="' + cls + '" data-id="' + item.id + '">' +
+    '<div class="nm">' + nameHTML +
+      '<span class="row-actions">' +
+        '<button class="row-btn btn-edit" title="Edit name" data-action="edit" data-id="' + item.id + '">&#9998;</button>' +
+        '<button class="row-btn btn-cal" title="Edit dates" data-action="cal" data-id="' + item.id + '">&#128197;</button>' +
+        '<button class="row-btn btn-add" title="Insert row below" data-action="add" data-id="' + item.id + '">+</button>' +
+        '<button class="row-btn btn-del" title="Delete row" data-action="del" data-id="' + item.id + '">&minus;</button>' +
+      '</span>' +
+    '</div>' +
+    '<div class="pct"><input class="pct-input" type="text" value="' + pctDisplay + '" data-id="' + item.id + '" /></div>' +
+    '<div class="gantt" id="gantt-' + item.id + '">' +
+      GRID_HTML +
+      '<div class="bar bar-bg" style="left:' + startP + '%;width:' + barW + '%"></div>' +
+      '<div class="bar bar-progress" id="prog-' + item.id + '" style="left:' + startP + '%;width:' + progressW + '%;background:' + pColor + '"></div>' +
+      '<div class="gantt-dot-wrap" style="left:' + TODAY_PCT + '%">' +
+        '<div class="status-dot st-' + item.status + '" data-id="' + item.id + '"></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function render() {
+  recomputeGroups();
+  var html = buildHeader();
+  DATA.forEach(function(item) { html += buildRow(item); });
+  chartEl.innerHTML = html;
+  attachEvents();
+}
+
+// ═══════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════
+var modalOverlay = document.getElementById('modalOverlay');
+var insertAfterIdx = -1;
+
+function openModal(afterId) {
+  if (afterId === null) {
+    insertAfterIdx = DATA.length;
+    document.getElementById('modalTitle').textContent = 'Add Workstream Row (at end)';
+  } else {
+    insertAfterIdx = DATA.findIndex(function(d) { return d.id === afterId; }) + 1;
+    var ref = DATA.find(function(d) { return d.id === afterId; });
+    document.getElementById('modalTitle').textContent = 'Insert Row Below "' + (ref ? ref.name : '') + '"';
+  }
+  document.getElementById('fName').value = '';
+  document.getElementById('fType').value = 'child';
+  document.getElementById('fStatus').value = 'green';
+  document.getElementById('fPct').value = '0';
+  document.getElementById('fStart').value = '2026-03-01';
+  document.getElementById('fEnd').value = '2026-09-01';
+  document.getElementById('fAlpha').checked = false;
+  modalOverlay.classList.add('visible');
+  setTimeout(function() { document.getElementById('fName').focus(); }, 100);
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('visible');
+}
+
+function submitModal() {
+  var name = document.getElementById('fName').value.trim();
+  if (!name) { document.getElementById('fName').style.borderColor = '#e74c3c'; return; }
+  var typeVal = document.getElementById('fType').value;
+  var isGroup = typeVal === 'group';
+  var status = document.getElementById('fStatus').value;
+  var rawPct = document.getElementById('fPct').value.trim().replace(/%/g, '');
+  var p = rawPct.toUpperCase() === 'TBD' ? -1 : parseInt(rawPct, 10);
+  if (isNaN(p)) p = 0;
+  p = Math.max(-1, Math.min(100, p));
+  var start = document.getElementById('fStart').value || '2026-03-01';
+  var end = document.getElementById('fEnd').value || '2026-09-01';
+  var alpha = document.getElementById('fAlpha').checked;
+
+  var item = {
+    id: nextId++,
+    name: name,
+    pct: p,
+    delta: 0,
+    status: status,
+    group: isGroup,
+    subgroup: false,
+    alpha: alpha,
+    start: start,
+    end: end,
+    firstInGroup: false
+  };
+
+  DATA.splice(insertAfterIdx, 0, item);
+  saveData();
+  closeModal();
+  render();
+}
+
+document.getElementById('btnCancel').addEventListener('click', closeModal);
+document.getElementById('btnOk').addEventListener('click', submitModal);
+modalOverlay.addEventListener('click', function(e) { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (modalOverlay.classList.contains('visible')) closeModal();
+    closeDatePop();
+    closePicker();
+  }
+  if (e.key === 'Enter' && modalOverlay.classList.contains('visible')) submitModal();
+});
+
+// ═══════════════════════════════════════
+//  INTERACTIVITY
+// ═══════════════════════════════════════
+var openPicker = null;
+var openDatePop = null;
+
+function closePicker() {
+  if (openPicker) { openPicker.remove(); openPicker = null; }
+  var ov = document.querySelector('.picker-overlay');
+  if (ov) ov.remove();
+}
+
+function closeDatePop() {
+  if (openDatePop) { openDatePop.remove(); openDatePop = null; }
+  var ov = document.querySelector('.datepop-overlay');
+  if (ov) ov.remove();
+}
+
+function showDatePop(id, anchorRect) {
+  closeDatePop();
+  var item = DATA.find(function(d) { return d.id === id; });
+  if (!item) return;
+
+  var overlay = document.createElement('div');
+  overlay.className = 'datepop-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:90';
+  overlay.addEventListener('click', closeDatePop);
+  document.body.appendChild(overlay);
+
+  var pop = document.createElement('div');
+  pop.className = 'date-pop';
+  pop.style.left = (anchorRect.left) + 'px';
+  pop.style.top = (anchorRect.bottom + 6) + 'px';
+
+  var startDiv = document.createElement('div');
+  var startLbl = document.createElement('label');
+  startLbl.textContent = 'Start Date';
+  var startInp = document.createElement('input');
+  startInp.type = 'date';
+  startInp.value = item.start;
+  startDiv.appendChild(startLbl);
+  startDiv.appendChild(startInp);
+
+  var endDiv = document.createElement('div');
+  var endLbl = document.createElement('label');
+  endLbl.textContent = 'End Date';
+  var endInp = document.createElement('input');
+  endInp.type = 'date';
+  endInp.value = item.end;
+  endDiv.appendChild(endLbl);
+  endDiv.appendChild(endInp);
+
+  pop.appendChild(startDiv);
+  pop.appendChild(endDiv);
+
+  startInp.addEventListener('change', function() {
+    if (startInp.value) { item.start = startInp.value; updateBar(item); saveData(); }
+  });
+  endInp.addEventListener('change', function() {
+    if (endInp.value) { item.end = endInp.value; updateBar(item); saveData(); }
+  });
+
+  document.body.appendChild(pop);
+  openDatePop = pop;
+}
+
+function attachEvents() {}
+
+var STATUS_OPTIONS = [
+  { key:'done',   label:'Done' },
+  { key:'green',  label:'On Track' },
+  { key:'yellow', label:'Risk of Delay' },
+  { key:'red',    label:'Delayed' },
+  { key:'onhold', label:'On Hold' },
+  { key:'gray',   label:'Not Started' }
+];
+
+chartEl.addEventListener('click', function(e) {
+  var dot = e.target.closest('.status-dot');
+  if (dot) {
+    e.stopPropagation();
+    closePicker();
+    var id = +dot.dataset.id;
+    var rect = dot.getBoundingClientRect();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'picker-overlay';
+    overlay.addEventListener('click', closePicker);
+    document.body.appendChild(overlay);
+
+    var picker = document.createElement('div');
+    picker.className = 'status-picker';
+    picker.style.left = (rect.left + rect.width / 2 - 100) + 'px';
+    picker.style.top  = (rect.bottom + 8) + 'px';
+
+    STATUS_OPTIONS.forEach(function(c) {
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer';
+      var opt = document.createElement('div');
+      opt.className = 'sp-opt st-' + c.key;
+      opt.title = c.label;
+      var lbl = document.createElement('div');
+      lbl.className = 'sp-label';
+      lbl.textContent = c.label;
+      wrap.appendChild(opt);
+      wrap.appendChild(lbl);
+      wrap.addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        var item = DATA.find(function(d) { return d.id === id; });
+        if (item) {
+          item.status = c.key;
+          dot.className = 'status-dot st-' + c.key;
+          saveData();
+        }
+        closePicker();
+      });
+      picker.appendChild(wrap);
+    });
+
+    document.body.appendChild(picker);
+    openPicker = picker;
+    return;
+  }
+
+  var btn = e.target.closest('.row-btn');
+  if (btn) {
+    e.stopPropagation();
+    var action = btn.dataset.action;
+    var btnId = +btn.dataset.id;
+    if (action === 'edit') {
+      var item = DATA.find(function(d) { return d.id === btnId; });
+      if (!item) return;
+      var row = btn.closest('.row');
+      var nmText = row.querySelector('.nm-text');
+      if (!nmText) return;
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.value = item.name;
+      input.style.cssText = 'width:100%;font-size:13px;font-family:inherit;padding:2px 6px;border:1.5px solid #7b3f9e;border-radius:5px;outline:none;box-shadow:0 0 0 2.5px rgba(123,63,158,.18);background:#fff';
+      if (item.group) input.style.fontWeight = '700';
+      nmText.replaceWith(input);
+      input.focus();
+      input.select();
+      function commitEdit() {
+        var val = input.value.trim();
+        if (val) item.name = val;
+        saveData();
+        var span = document.createElement('span');
+        span.className = 'nm-text';
+        span.textContent = item.name;
+        input.replaceWith(span);
+      }
+      input.addEventListener('blur', commitEdit);
+      input.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Enter') input.blur();
+        if (ev.key === 'Escape') { input.value = item.name; input.blur(); }
+      });
+    } else if (action === 'cal') {
+      showDatePop(btnId, btn.getBoundingClientRect());
+    } else if (action === 'add') {
+      openModal(btnId);
+    } else if (action === 'del') {
+      var idx = DATA.findIndex(function(d) { return d.id === btnId; });
+      if (idx > -1) {
+        DATA.splice(idx, 1);
+        saveData();
+        render();
+      }
+    }
+    return;
+  }
+});
+
+chartEl.addEventListener('focusin', function(e) {
+  if (e.target.classList.contains('pct-input')) {
+    e.target.select();
+  }
+});
+
+chartEl.addEventListener('change', function(e) {
+  if (!e.target.classList.contains('pct-input')) return;
+  var id = +e.target.dataset.id;
+  var item = DATA.find(function(d) { return d.id === id; });
+  if (!item) return;
+  var raw = e.target.value.trim().replace(/\(.*\)/g, '').replace(/%/g, '');
+  if (raw.toUpperCase() === 'TBD') {
+    item.pct = -1;
+  } else {
+    var v = parseInt(raw, 10);
+    if (isNaN(v)) { e.target.value = formatPct(item); return; }
+    item.pct = Math.max(0, Math.min(100, v));
+  }
+  e.target.value = formatPct(item);
+  updateBar(item);
+  saveData();
+});
+
+chartEl.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && e.target.classList.contains('pct-input')) e.target.blur();
+});
+
+function updateBar(item) {
+  var gantt = document.getElementById('gantt-' + item.id);
+  if (!gantt) return;
+  var startP = pct(item.start);
+  var endP   = pct(item.end);
+  var barW   = endP - startP;
+  var progressW = (startP < TODAY_PCT) ? Math.min(TODAY_PCT - startP, barW) : 0;
+  var pColor = progressColor(item.pct);
+
+  var bg = gantt.querySelector('.bar-bg');
+  var prog = gantt.querySelector('.bar-progress');
+  if (bg) { bg.style.left = startP + '%'; bg.style.width = barW + '%'; }
+  if (prog) { prog.style.left = startP + '%'; prog.style.width = progressW + '%'; prog.style.background = pColor; }
+}
+
+render();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+document.getElementById('btnScreenshot').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Capturing…';
+
+  var hideEls = document.querySelectorAll('.hide-on-capture, .row-actions, .title-btns');
+  hideEls.forEach(function(el) { el.style.display = 'none'; });
+
+  var outer = document.querySelector('.outer');
+  html2canvas(outer, { scale: 2, backgroundColor: '#e8e5ec', useCORS: true }).then(function(canvas) {
+    hideEls.forEach(function(el) { el.style.display = ''; });
+    btn.disabled = false;
+    btn.innerHTML = '&#128247; Screenshot';
+
+    var link = document.createElement('a');
+    link.download = 'CCF-Workstream-Roadmap-Slide2.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(function() {
+    hideEls.forEach(function(el) { el.style.display = ''; });
+    btn.disabled = false;
+    btn.innerHTML = '&#128247; Screenshot';
+  });
+});
+</script>
+</body>
+</html>
