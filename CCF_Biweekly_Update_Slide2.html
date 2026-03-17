@@ -326,12 +326,14 @@ async function pollForChanges() {
 
 setInterval(pollForChanges, POLL_INTERVAL);
 
-// On load: try to fetch from backend, fall back to DEFAULT_DATA
+// Load DEFAULT_DATA immediately so chart renders right away
+loadData();
+lastKnownJSON = JSON.stringify(DATA);
+
+// Then try to fetch from backend and re-render with remote data
 (async function init() {
   if (!SCRIPT_URL) {
     updateSyncUI('not-connected', 'No backend URL');
-    loadData();
-    lastKnownJSON = JSON.stringify(DATA);
     return;
   }
   updateSyncUI('not-connected', 'Connecting...');
@@ -339,15 +341,15 @@ setInterval(pollForChanges, POLL_INTERVAL);
   if (result && result.data) {
     DATA = result.data;
     if (result.nextId) nextId = result.nextId;
+    lastKnownJSON = JSON.stringify(DATA);
     backendReady = true;
     updateSyncUI('connected', 'Synced');
+    render();
   } else {
-    loadData();
     backendReady = true;
     pushData();
     updateSyncUI('connected', 'Synced');
   }
-  lastKnownJSON = JSON.stringify(DATA);
 })();
 
 var chartEl = document.getElementById('chart');
